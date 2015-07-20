@@ -11,3 +11,6 @@ If you require support please visit http://ui.slcsecurity.com/pages/display/doc/
 
 Additional Formats (Not available with this utility):
 Visit the Automation section at http://ui.slcsecurity.com/events/automation
+
+Additional information:
+While we wrote this utility for our specific MISP instance it will run with any MISP instance. We will be adding that in the next commit. 
