@@ -7,7 +7,7 @@ InfoVersion=0
 Include Manifest=1
 [Project]
 Main File=#replicate.dsc
-tl_Main File=0
+tl_Main File=50
 DS Version=5.0
 Other File 1=
 [BM_replicate]

@@ -55,7 +55,7 @@ INTERNET HTTP,DESTROY,1
 
 
 #Download Suricata Rules#
-%%url = "http://ui.slcsecurity.com/events/nids/suricata/download"
+%%url = "http://"%B"/events/nids/suricata/download"
 list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Loaded Internet Connection Library"
 list savefile,7,%%logfile
 INTERNET HTTP,CREATE,1
@@ -70,7 +70,7 @@ INTERNET HTTP,DESTROY,1
 #End Download Suricata Rules#
 
 #Download CSV Rules#
-%%url = "http://ui.slcsecurity.com/events/csv/download/"
+%%url = "http://"%B"/events/csv/download/"
 list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Loaded Internet Connection Library"
 list savefile,7,%%logfile
 INTERNET HTTP,CREATE,1
