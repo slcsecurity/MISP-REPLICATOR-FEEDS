@@ -1,1 +1,1 @@
-Placeholder. Downloaded content is posted in this directory when the utility is executed. 
+This is a placeholder for data created when the utility is run

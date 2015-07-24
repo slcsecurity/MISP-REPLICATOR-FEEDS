@@ -1,4 +1,5 @@
-#Version 1.1a
+#Version 1.2a
+#Added support for specifying the server and moved settings to a Windows ini file to be more standardized
 
 %%logfile = @datetime(mm-dd-yyyy-hh-nn).log
 
@@ -6,13 +7,18 @@ list create,7
 list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Replicator Process Started"
 list savefile,7,%%logfile
 
-list create,5
-list loadfile,5,@path(%0)authkey.txt
-%%key = @next(5)
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Using Auth Key - "%%key
-list savefile,7,%%logfile
-list close,5
-
+inifile open,@path(%0)settings.ini
+%A = @iniread(settings,key)
+%B = @iniread(settings,server)
+inifile close
+if @null(%A)
+info "Please edit the settings files and add your MISP API key"
+stop
+end
+if @null(%B)
+info "Please edit the settings files and enter your MISP server IP address to the server section"
+stop
+end
 
 external string
 #DEFINE FUNCTION,STRING
@@ -33,11 +39,11 @@ wait 5
 
 :getdata
 #Download Snort Rules#
-%%url = "http://ui.slcsecurity.com/events/nids/snort/download"
+%%url = "http://"%B"/events/nids/snort/download"
 list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Loaded Internet Connection Library"
 list savefile,7,%%logfile
 INTERNET HTTP,CREATE,1
-INTERNET HTTP,HEADER,1,%%key
+INTERNET HTTP,HEADER,1,%A
 INTERNET HTTP,THREADS,1,OFF
 INTERNET HTTP,PROTOCOL,1,1
 INTERNET HTTP,USERAGENT,1,"SLC Replicator Version 1.1a/Windows XPlatorm"

@@ -1,6 +1,18 @@
+#Version 1.1a
+
+%%logfile = @datetime(mm-dd-yyyy-hh-nn).log
+
 list create,7
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Ingest Process Started"
-list savefile,7,@path(%0)log.txt
+list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Replicator Process Started"
+list savefile,7,%%logfile
+
+list create,5
+list loadfile,5,@path(%0)authkey.txt
+%%key = @next(5)
+list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Using Auth Key - "%%key
+list savefile,7,%%logfile
+list close,5
+
 
 external string
 #DEFINE FUNCTION,STRING
@@ -8,144 +20,66 @@ external string
 EXTERNAL VDSIPP.DLL,751118615004|ISP Toolz
 #DEFINE COMMAND, INTERNET
 #DEFINE FUNCTION, INTERNET
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Loaded IP, String Command and Functions Library"
-list savefile,7,@path(%0)log.txt
+list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Loaded Internet Connection Library"
+list savefile,7,%%logfile
   
 DIRECTORY CHANGE,@path(%0)
 
 
-##########################################
-# START EMERGING THREATS COMPROMISED IPS #
-##########################################
+file delete,@path(%0)\Feed\*.*
+wait 5
 
-%%name = "ET Compromised Host"
-%%threatlevel = "Medium"
-%%url = "http://rules.emergingthreats.net/blockrules/compromised-ips.txt"
-%%source = "Emerging Threats"
-%%category = "Compromised Host"
-%%file = "C:\Alpha\Feeds\ET Compromised Host-"@datetime(mm-dd-yyyy)".txt"
 
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Processing "%%name" which is a "%%threatlevel" threat feed"
-list savefile,7,@path(%0)log.txt
 
+:getdata
+#Download Snort Rules#
+%%url = "http://ui.slcsecurity.com/events/nids/snort/download"
+list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Loaded Internet Connection Library"
+list savefile,7,%%logfile
 INTERNET HTTP,CREATE,1
+INTERNET HTTP,HEADER,1,%%key
 INTERNET HTTP,THREADS,1,OFF
 INTERNET HTTP,PROTOCOL,1,1
-INTERNET HTTP,USERAGENT,1,"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:11.0) Gecko/20100101 Firefox/11.0"
+INTERNET HTTP,USERAGENT,1,"SLC Replicator Version 1.1a/Windows XPlatorm"
 list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Downloading "%%url
-list savefile,7,@path(%0)log.txt
-INTERNET HTTP,DOWNLOAD,1,%%url,@path(%0)ip.txt
+list savefile,7,%%logfile
+INTERNET HTTP,DOWNLOAD,1,%%url,@path(%0)Feed\snort.rules
 INTERNET HTTP,DESTROY,1
-
-list create,1
-list add,1,"UNIQUEID,DATE,IP,BLACKLIST,THREATLEVEL,SOURCE,CATEGORY,CITY,STATE,ZIP,COUNTRY,ORG"
-list create,9
-list loadfile,9,@path(%0)ip.txt
-%%total = @count(9)
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":There are a total of "%%total" lines to process"
-list savefile,7,@path(%0)log.txt
-%%now = 0
-REPEAT
-%%ip = @next(9)
-if @null(%%ip)
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)": Skipped line "%%now" because it was empty"
-goto skip
-end
-if @string(HoldsString,%%ip,"#",)
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)": Skipped line "%%now" because it was a comment"
-goto skip
-end
-if @string(HoldsString,%%ip,"//",)
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)": Skipped line "%%now" because it was a comment"
-goto skip
-end
-
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Processing "%%ip" which is line "%%now" of "%%total
-list savefile,7,@path(%0)log.txt
-gosub getlocation
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Adding line to output"
-list savefile,7,@path(%0)log.txt
-list add,7,@datetime(mm-dd-yyyy)": Adding :"@chr(44)%%ip@chr(44)%%name@chr(44)%%threatlevel@chr(44)%%source@chr(44)%%category@chr(44)%%city@chr(44)%%state@chr(44)%%zip@chr(44)%%country@chr(44)%%org
-list add,1,@datetime(mmddyyhhnnss)@chr(44)@datetime(mm-dd-yyyy)@chr(44)%%ip@chr(44)%%name@chr(44)%%threatlevel@chr(44)%%source@chr(44)%%category@chr(44)%%city@chr(44)%%state@chr(44)%%zip@chr(44)%%country@chr(44)%%org
-list savefile,1,%%file
-:skip
-%%now = @succ(%%now)
-UNTIL @equal(%%now,%%total)
-#--- Database End Lookup ---#
-list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Saving Final File Output :"%%file
-list savefile,7,@path(%0)log.txt
-list savefile,1,%%file
-list close,9
-list close,1
-###############################################
-# END EMERGING THREATS COMPROMISED IPS MODULE #
-###############################################
-exit
+#End Download Snort Rules#
 
 
-
-
-:getlocation
-%%url = %%whois%%ip
-file delete,@path(%0)ipx.txt
+#Download Suricata Rules#
+%%url = "http://ui.slcsecurity.com/events/nids/suricata/download"
+list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Loaded Internet Connection Library"
+list savefile,7,%%logfile
 INTERNET HTTP,CREATE,1
+INTERNET HTTP,HEADER,1,%%key
 INTERNET HTTP,THREADS,1,OFF
 INTERNET HTTP,PROTOCOL,1,1
-INTERNET HTTP,USERAGENT,1,"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:11.0) Gecko/20100101 Firefox/11.0"
-INTERNET HTTP,DOWNLOAD,1,http://www.slcsecurity.com/blocks/whois/whois.php?domain=%%ip,@path(%0)ipx.txt
+INTERNET HTTP,USERAGENT,1,"SLC Replicator Version 1.1a/Windows XPlatorm"
+list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Downloading "%%url
+list savefile,7,%%logfile
+INTERNET HTTP,DOWNLOAD,1,%%url,@path(%0)Feed\suricata.rules
 INTERNET HTTP,DESTROY,1
+#End Download Suricata Rules#
+
+#Download CSV Rules#
+%%url = "http://ui.slcsecurity.com/events/csv/download/"
+list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Loaded Internet Connection Library"
+list savefile,7,%%logfile
+INTERNET HTTP,CREATE,1
+INTERNET HTTP,HEADER,1,%%key
+INTERNET HTTP,THREADS,1,OFF
+INTERNET HTTP,PROTOCOL,1,1
+INTERNET HTTP,USERAGENT,1,"SLC Replicator Version 1.1a/Windows XPlatorm"
+list add,7,@datetime(mm-dd-yyyy hh:nn:ss)":Downloading "%%url
+list savefile,7,%%logfile
+INTERNET HTTP,DOWNLOAD,1,%%url,@path(%0)Feed\rules.csv
+INTERNET HTTP,DESTROY,1
+#End Download CSV Rules#
 
 
-%%org = "NA"
-%%country = "NA"
-%%city = "NA"
-%%state = "NA"
-%%zip = "NA"
 
-
-list create,5
-list loadfile,5,@path(%0)ipx.txt
-%%nowx = 0
-%%totalx = @count(5)
-REPEAT
-%%line = @next(5)
-
-if @string(HoldsString,%%line,"rganization",)
-%%org = @string(DelType, %%line,Punct)
-%%org = @string(TrimAll,%%org)
-if @null(%%org)
-%%org = "NA"
-end
-end
-
-if @string(HoldsWord,%%line,"City",)
-%%city = @string(GetAfter,%%line,":",first,)
-%%city = @string(TrimAll,%%city)
-%%city = @string(DelType, %%city,Punct)
-end
-
-if @string(HoldsWord,%%line,"State",)
-%%state = @string(GetAfter,%%line,":",first,)
-%%state = @string(TrimAll,%%state)
-%%state = @string(DelType, %%state,Punct)
-end
-
-if @string(HoldsWord,%%line,"Postal",)
-%%zip = @string(GetAfter,%%line,":",first,)
-%%zip = @string(TrimAll,%%zip)
-%%zip = @string(DelType, %%zip,Punct)
-end
-
-if @string(HoldsWord,%%line,"Country",)
-%%country = @string(GetAfter,%%line,":",first,)
-%%country = @string(TrimAll,%%country)
-%%country = @string(DelType, %%country,Punct)
-if @string(HoldsWord,%%country,"World",)
-%%country = "Unknown"
-end
-end
-
-%%nowx = @succ(%%nowx)
-UNTIL @equal(%%nowx,%%totalx)
-list close,5
-exit
+:done
+list savefile,7,%%logfile
+stop

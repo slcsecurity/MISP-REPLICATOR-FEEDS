@@ -1,13 +1,13 @@
+[Syntax]
+Commands=INTERNET
+Functions=@STRING,@INTERNET
 [Compiler]
 IconFile=#rlo.ico
 InfoVersion=0
 Include Manifest=1
-[Syntax]
-Commands=INTERNET
-Functions=@STRING,@INTERNET
 [Project]
 Main File=#replicate.dsc
-tl_Main File=71
+tl_Main File=0
 DS Version=5.0
 Other File 1=
 [BM_replicate]
